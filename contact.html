@@ -101,26 +101,85 @@
             </div>
             <div class="row g-5">
                 <div class="col-lg-7">
-                    <form>
+                    <form id="contactForm">
                         <div class="row g-3">
                             <div class="col-12">
-                                <input type="text" class="form-control bg-light border-0 px-4" placeholder="Ваше имя" style="height: 55px;">
+                                <input type="text" id="name" class="form-control bg-light border-0 px-4" placeholder="Ваше имя" style="height: 55px">
+                                <div id="nameError" class="text-danger"></div>
                             </div>
                             <div class="col-12">
-                                <input type="email" class="form-control bg-light border-0 px-4" placeholder="Ваш Email" style="height: 55px;">
+                                <input type="email" id="email" class="form-control bg-light border-0 px-4" placeholder="Ваш Email" style="height: 55px">
+                                <div id="emailError" class="text-danger"></div>
                             </div>
                             <div class="col-12">
-                                <input type="text" class="form-control bg-light border-0 px-4" placeholder="Причина обращения" style="height: 55px;">
+                                <input type="text" id="reason" class="form-control bg-light border-0 px-4" placeholder="Причина обращения" style="height: 55px">
                             </div>
                             <div class="col-12">
-                                <textarea class="form-control bg-light border-0 px-4 py-3" rows="8" placeholder="Обращения"></textarea>
+                                <textarea id="message" class="form-control bg-light border-0 px-4 py-3" rows="8" placeholder="Обращение"></textarea>
                             </div>
                             <div class="col-12">
-                                <button class="btn btn-primary w-100 py-3" type="submit">Отправить обращение</button>
+                                <div id="formError" class="text-danger"></div>
+                                <div id="successMessage" class="text-success"></div>
+                                <button id="submitBtn" class="btn btn-primary w-100 py-3" type="button">Отправить обращение</button>
                             </div>
                         </div>
                     </form>
                 </div>
+                
+                <script>
+                    document.getElementById('submitBtn').addEventListener('click', function() {
+                        // Сброс предыдущих ошибок и сообщения об успешной отправке
+                        document.getElementById('nameError').innerText = '';
+                        document.getElementById('emailError').innerText = '';
+                        document.getElementById('formError').innerText = '';
+                        document.getElementById('successMessage').innerText = '';
+                
+                        var name = document.getElementById("name").value;
+                        var email = document.getElementById("email").value;
+                        var reason = document.getElementById("reason").value;
+                        var message = document.getElementById("message").value;
+                
+                        var hasError = false; // Флаг наличия ошибок
+                
+                        // Проверка имени на наличие цифр
+                        if (/[\d]/.test(name)) {
+                            document.getElementById('nameError').innerText = 'Имя не должно содержать цифры.';
+                            hasError = true;
+                        }
+                
+                        // Проверка email на наличие символа @
+                        if (!/@/.test(email)) {
+                            document.getElementById('emailError').innerText = 'Введите корректный Email (должен содержать @).';
+                            hasError = true;
+                        }
+                
+                        // Проверка на заполненность полей
+                        if (!name) {
+                            document.getElementById('nameError').innerText = 'Пожалуйста, введите ваше имя.';
+                            hasError = true;
+                        }
+                
+                        if (!email) {
+                            document.getElementById('emailError').innerText = 'Пожалуйста, введите ваш Email.';
+                            hasError = true;
+                        }
+                
+                        if (!reason) {
+                            document.getElementById('formError').innerText = 'Пожалуйста, введите причину обращения и текст обращения.';
+                            hasError = true;
+                        }
+                
+                        if (!hasError) { // Если нет ошибок, то выводим сообщение об успешной отправке
+                            document.getElementById('successMessage').innerText = 'Обращение успешно отправлено!';
+                
+                            // Сброс значений полей после успешной отправки
+                            document.getElementById("name").value = '';
+                            document.getElementById("email").value = '';
+                            document.getElementById("reason").value = '';
+                            document.getElementById("message").value = '';
+                        }
+                    });
+                </script>
                 <div class="col-lg-5">
                     <div class="bg-light mb-5 p-5">
                         <div class="d-flex align-items-center mb-2">
