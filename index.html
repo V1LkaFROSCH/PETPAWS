@@ -66,6 +66,10 @@
                     <div class="text-start">
             <form action="auth.html">
                 <button class="btn">Вход</button>
+                <div class="header-right">
+                    <form id="account-form" method="post" action="auth.html" style="float: right;padding-top: 8px;;">
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -425,6 +429,39 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script>
+        const acc_form = $('#account-form');
+        check_session((has_session) => {
+            if (has_session) {
+                get_login((login) => {
+                    console.log(login);
+                    acc_form.append(`<label class="field" for="logout" id="login-name" style="color:white; margin-right: 8px">${login}</label>`);
+                    acc_form.append(`<button class="btn" id="logout-button" name="logout">Выход</button>`);
+                    $('#logout-button').click((e) => {
+                        e.preventDefault()
+                        logout((res) => {
+                            if (res) {
+                                window.location = window.location;
+                            } else {
+                                alert(res.error);
+                                window.location = window.location;
+                            }
+                        })
+                    })
+                })
+            } else {
+                acc_form.append(`<button class="btn" id="login-button">Вход</button>`);
+                $('#login-button').click((e) => {
+                    e.preventDefault()
+                    localStorage.setItem('redirect_from', window.location);
+                    window.location = acc_form.attr('action');
+                })
+            }
+        })
+        $('#logo').click((e) => {
+            window.location = '/';
+        })
+    </script>
 </body>
 
 </html>
