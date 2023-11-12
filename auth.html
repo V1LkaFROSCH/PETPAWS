@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>PET Paws - Вход</title>
+
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" sizes="50x50" href="/img/favicon.png">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800" rel="stylesheet">
+
+  <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+</head>
+
+<body>
+  <div id="clouds">
+    <div class="cloud x1"></div>
+    <div class="cloud x2"></div>
+    <div class="cloud x3"></div>
+    <div class="cloud x4"></div>
+    <div class="cloud x5"></div>
+    <div class="cloud x2"></div>
+    <div class="cloud x1"></div>
+  </div>
+
+  <div class="login-container login-form">
+
+    
+    <div id="login">
+      <form method="post" action="auth.php?action=login" id="login-form">
+        <h2 class="" id="form-name">Вход</h2>
+        <fieldset class="clearfix">
+
+          <p style="display: none;" id="login_field">
+            <span class="fontawesome-user"></span><input type="text" name="login" placeholder="Логин">
+          </p>
+          <p style="display: none;" id="password">
+            <span class="fontawesome-lock"></span><input type="password" name="pass" placeholder="Пароль">
+          </p>
+          <p style="display: none;" id="repeated-password">
+            <span class="fontawesome-lock"></span><input type="password" name="pass-repeat"
+              placeholder="Повторите пароль">
+          </p>
+          <button class="login-button" id="submit-button">Вход</button>
+        </fieldset>
+
+      </form>
+
+      <p id="switch-field" style="display: none;">Впервые здесь? <a class="link blue" id="switch-button"
+          href="#">Зарегистрироваться</a><span class="fontawesome-arrow-right"></span></p>
+
+    </div>
+
+  </div>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+
+    const lfi = 'login-form', rfi = 'register-form', afi = 'account-form';
+    const swtch_btn = $('#switch-button')[0], frm_name = $('#form-name')[0], sbmt_btn = $('#submit-button')[0];
+    const login_fld = $('#login_field'), password_fld = $('#password'), rpt_password_fld = $('#repeated-password'), swtch_fld = $('#switch-field');
+
+    function set_register_form() {
+      $('form').attr('id', rfi);
+      login_fld.show();
+      password_fld.show();
+      rpt_password_fld.show();
+      swtch_fld.show();
+      $("form input[name='login']").attr("required", "")
+      $("form input[name='pass']").attr("required", "")
+      $("form input[name='pass-repeat']").attr("required", "")
+      swtch_btn.innerText = 'Войти';
+      frm_name.innerText = 'Регистрация';
+      sbmt_btn.innerText = 'Зарегистрироваться';
+    }
+
+    function set_login_form() {
+      $('form').attr('id', lfi)
+      login_fld.show();
+      password_fld.show();
+      rpt_password_fld.hide();
+      swtch_fld.show();
+      $("form input[name='login']").attr("required", "")
+      $("form input[name='pass']").attr("required", "")
+      $("form input[name='pass-repeat']").removeAttr("required")
+      swtch_btn.innerText = 'Зарегистрироваться';
+      frm_name.innerText = 'Вход';
+      sbmt_btn.innerText = 'Войти';
+    }
+
+    $(document).ready(() => {
+      check_session((has_session) => {
+        if (has_session) {
+          get_login((login) => {
+            if (login) {
+              $('form').attr('id', afi);
+              frm_name.innerText = `Вы уже вошли под логином ${login}. Хотите выйти?`
+              sbmt_btn.innerText = `Выйти из аккаунта`;
+              swtch_fld.hide();
+            } else {
+              alert(login.error);
+            }
+          })
+        } else {
+          set_login_form()
+        }
+      })
+    })
+
+    $('form').submit((e) => {
+      e.preventDefault();
+      var name = $("form input[name='name']").val();
+      var login = $("form input[name='login']").val();
+      var pass = $("form input[name='pass']").val();
+      var pass_repeat = $("form input[name='pass-repeat']").val();
+      console.log(e)
+      if ($('form').attr('id') == lfi) {
+        signin(login, pass, (response) => {
+          console.log(response);
+          if (response === true) {
+            redirect_url = localStorage.getItem('redirect_from')
+            if (redirect_url) {
+              window.location = redirect_url;
+            } else {
+              window.location = "/";
+            }
+          } else {
+            alert(response.error);
+            return false;
+          }
+        });
+      } else if ($('form').attr('id') == rfi) {
+        if (pass == pass_repeat) {
+          signup(login, pass, (response) => {
+            console.log(response);
+            if (response === true) {
+              redirect_url = localStorage.getItem('redirect_from')
+              if (redirect_url) {
+                window.location = redirect_url;
+              } else {
+                window.location = "/";
+              }
+            } else {
+              alert(response.error);
+              return false;
+            }
+          });
+        } else {
+          alert("Пароли не совпадают!");
+        }
+      } else if ($('form').attr('id') == afi) {
+        logout((response) => {
+          console.log(response);
+          if (response === true) {
+            set_login_form();
+          } else {
+            alert(response.error);
+            return false;
+          }
+        });
+      }
+    })
+    $('#switch-button').click(() => {
+      if ($('form').attr('id') == lfi) {
+        set_register_form()
+      } else if ($('form').attr('id') == rfi) {
+        set_login_form()
+      }
+    })
+    $('#logo').click((e) => {
+      window.location = '/';
+    })
+  </script>
+</body>
